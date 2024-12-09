@@ -1,0 +1,30 @@
+.review-slider {
+    position: relative;
+
+    display: flex;
+    gap: 1em;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+
+    user-select: none;
+    /* Prevent text selection */
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+.review-slider:active {
+    cursor: grabbing;
+}
+
+.review-slider::-webkit-scrollbar {
+    display: none;
+}
+
+.review-card {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    width: 100%;
+    aspect-ratio: 1600 / 500; /* Keep aspect ratio for images */
+    color: #fff;
+}
