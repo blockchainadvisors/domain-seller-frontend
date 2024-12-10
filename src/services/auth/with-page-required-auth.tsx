@@ -46,7 +46,7 @@ function withPageRequiredAuth(
           returnTo: returnToPath,
         });
 
-        let redirectTo = `/login?${params.toString()}`;
+        let redirectTo = `/auth/login?${params.toString()}`;
 
         if (user) {
           redirectTo = `/`;

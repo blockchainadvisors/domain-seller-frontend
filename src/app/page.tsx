@@ -1,3 +1,5 @@
+"use client"
+
 import SparklesText from "@/components/ui/sparkles-text";
 import Navbar from "./components/Navbar";
 import { Input } from "@/components/ui/input";
@@ -7,8 +9,38 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Slider from "./components/Slider";
 import ReviewSlider from "./components/ReviewSlider";
+import useFetch from "@/services/api/use-fetch";
+import { API_URL } from "@/services/api/config";
+import wrapperFetchJsonResponse from "@/services/api/wrapper-fetch-json-response";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function Home() {
+  const [popularDomains, setPopularDomains] = useState([]);
+
+  const fetch = useFetch();
+
+  const getDomains = async () => {
+    const requestUrl = new URL(`${API_URL}/v1/domains/status/auction-active`);
+    
+    const res = await fetch(requestUrl, {
+      method: "GET"
+    });
+
+    const { status, data } = await wrapperFetchJsonResponse(res);
+    const responseData = (data as any).data;
+
+    if (status >= 200) {
+      setPopularDomains(responseData);
+    }
+  }
+
+  useEffect(() => {
+    (async () => {
+      await getDomains();
+    })();
+  }, []);
+
   return (
     <div className="relative min-h-screen font-[family-name:var(--font-geist-sans)]">
       {/* Hero */}
@@ -68,12 +100,17 @@ export default function Home() {
                 </TableHeader>
                 <TableBody>
                   {
-                    [...Array(4)].map((item, i) => (
-                      <TableRow key={i}>
-                        <TableCell>produce.co.uk</TableCell>
-                        <TableCell className="text-right">£4,500</TableCell>
+                    popularDomains.length ?
+                      popularDomains.map((domain: any, i) => (
+                        <TableRow key={i}>
+                          <TableCell><Link href={`/domains/${domain.id}`}>{domain.url}</Link></TableCell>
+                          <TableCell className="text-right">${domain.current_highest_bid}</TableCell>
+                        </TableRow>
+                      )) :
+                      <TableRow>
+                        <TableCell>No domains available</TableCell>
+                        <TableCell> </TableCell>
                       </TableRow>
-                    ))
                   }
                 </TableBody>
               </Table>
@@ -96,7 +133,7 @@ export default function Home() {
                   {
                     [...Array(4)].map((item, i) => (
                       <TableRow key={i}>
-                        <TableCell>produce.co.uk</TableCell>
+                        <TableCell>animal/pets</TableCell>
                       </TableRow>
                     ))
                   }
