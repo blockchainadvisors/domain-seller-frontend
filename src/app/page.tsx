@@ -16,12 +16,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function Home() {
-  const [popularDomains, setPopularDomains] = useState([]);
+  const [popularDomains, setPopularDomains] = useState<any[]>([]);
 
   const fetch = useFetch();
 
   const getDomains = async () => {
-    const requestUrl = new URL(`${API_URL}/v1/domains/status/auction-active`);
+    const requestUrl = new URL(`${API_URL}/v1/auctions/available/domain`);
     
     const res = await fetch(requestUrl, {
       method: "GET"
