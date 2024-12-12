@@ -50,7 +50,9 @@ function MyBids() {
                         <TableHead>Domain</TableHead>
                         <TableHead>Bid Date</TableHead>
                         <TableHead>Auction End Date</TableHead>
+                        <TableHead>Auction Status</TableHead>
                         <TableHead>Bid Amount</TableHead>
+                        <TableHead>Current Bid</TableHead>
                         <TableHead className="text-right">Bid Status</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -71,7 +73,13 @@ function MyBids() {
                                         {bid.auction_id.end_time}
                                     </TableCell>
                                     <TableCell>
+                                        {bid.auction_status}
+                                    </TableCell>
+                                    <TableCell>
                                         {bid.amount}
+                                    </TableCell>
+                                    <TableCell>
+                                        {bid.auction_id.current_bid}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         {bid.bid_status}

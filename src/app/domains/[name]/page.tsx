@@ -1,8 +1,37 @@
+
+"use client"; 
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import React from 'react'
+import  useDomain from "@/services/domains/use-domains";
+import { Domain } from '@/services/domains/domains-context';
+import React, { useEffect, useState } from 'react'
+
 
 export default function Bid() {
+    // const { selectDomain, clearSelectedDomain } = useDomainActions();
+    const { selectedDomain } = useDomain();
+    const [currentDomain, setCurrentDomain] = useState<Domain | undefined>(undefined);
+    useEffect(() => {
+        if (selectedDomain) {
+          setCurrentDomain(selectedDomain); // Store the whole domain object
+        }
+      }, [selectedDomain]);
+    // Handling actions (Place Bid, Lease, etc.)
+  const handlePlaceBid = () => {
+    // Implement the logic to place a bid
+    console.log("Placing bid...");
+  };
+
+  const handleLeaseNow = () => {
+    // Implement the logic for leasing the domain
+    console.log("Leasing domain...");
+  };
+
+  const handleMakeOffer = () => {
+    // Implement the logic for making an offer
+    console.log("Making an offer...");
+  };
   return (
     <div className='w-full'>
         <div className='relative w-full h-[40vh] -z-[1]'>
@@ -19,8 +48,8 @@ export default function Bid() {
                 <h2 className='text-xl my-10'>Choose your option to gain access to InnovateSpehere.com</h2>
 
                 <div className='flex flex-col'>
-                    <label className='text-lg'>Place your Bid</label>
-                    <strong className='text-secondary'>Current Bid: $32.42</strong>
+                    <label className='text-lg'>Place your Bid </label>
+                    <strong className='text-secondary'>Current Bid: {currentDomain?.current_bid}</strong>
 
                     <Input placeholder="Enter your offer..." />
 
@@ -32,7 +61,7 @@ export default function Bid() {
 
                 <div className='flex flex-col'>
                     <label className='text-lg'>Lease Instantly</label>
-                    <strong className='text-secondary'>Lease Price: $32.33</strong>
+                    <strong className='text-secondary'>Lease Price: {currentDomain?.lease_price}</strong>
 
                     <small className='text-muted mb-2'>Secure this premium domain instantly by leasing it at the set price</small>
                     <Button variant="secondary" className='self-start'>Lease Now</Button>

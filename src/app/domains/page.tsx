@@ -7,8 +7,17 @@ import useFetch from '@/services/api/use-fetch';
 import wrapperFetchJsonResponse from '@/services/api/wrapper-fetch-json-response';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
+import useDomainActions from '@/services/domains/use-domains-actions';
+import { Domain } from '@/services/domains/domains-context';
 
 export default function Domains() {
+ 
+  const { selectDomain } = useDomainActions(); 
+
+    const handleSelectDomain = (domain: Domain) => {
+      selectDomain(domain);
+    };
+  
     const [domains, setDomains] = useState<any[]>([]);
     const [filteredDomains, setFilteredDomains] = useState<any[]>([]);
     const [total, setTotal] = useState<number>(0);
@@ -92,7 +101,7 @@ export default function Domains() {
 
                                         <div className='flex flex-col'>
                                             <label className='font-bold'>Price:</label>
-                                            <span>${domain.current_highest_bid}</span>
+                                            <span>${domain.current_bid}</span>
                                         </div>
                                     </div>
 
@@ -107,9 +116,14 @@ export default function Domains() {
                                         </div>
                                     </div>
 
-                                    <Button variant="secondary" className='w-full' asChild>
+                                    <Button
+                                        variant="secondary"
+                                        className="w-full"
+                                        asChild
+                                        onClick={() => handleSelectDomain(domain)}
+                                    >
                                         <Link href={`/domains/${domain.id}`}>
-                                            Bid now
+                                        Bid now
                                         </Link>
                                     </Button>
                                 </li>
