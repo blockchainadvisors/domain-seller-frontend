@@ -62,7 +62,7 @@ function MyBids() {
                             bids.map((bid, i) => (
                                 <TableRow key={i}>
                                     <TableCell className="font-medium">
-                                        <Link href={`/domains/${bid.domain_id}`}>
+                                        <Link href={`/domains/${bid.auction_id.id}`}>
                                             {bid.url}
                                         </Link>
                                     </TableCell>
