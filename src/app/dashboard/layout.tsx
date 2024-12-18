@@ -25,6 +25,9 @@ export default function Layout({
                     <li>
                         <Link href="/dashboard/settings" className={pathname == '/dashboard/settings' ? 'font-bold text-secondary' : 'text-white'}>Settings</Link>
                     </li>
+                    {/* <li>
+                        <Link href="/payment" className={pathname == '/payment' ? 'font-bold text-secondary' : 'text-white'}>Payments</Link>
+                    </li> */}
                 </ul>
 
                 <div className='grow-[3] h-full'>
