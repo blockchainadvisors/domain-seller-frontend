@@ -104,7 +104,7 @@ export default function Home() {
                       popularDomains.map((domain: any, i) => (
                         <TableRow key={i}>
                           <TableCell><Link href={`/domains/${domain.id}`}>{domain.url}</Link></TableCell>
-                          <TableCell className="text-right">${domain.current_highest_bid}</TableCell>
+                          <TableCell className="text-right">${domain.current_bid}</TableCell>
                         </TableRow>
                       )) :
                       <TableRow>

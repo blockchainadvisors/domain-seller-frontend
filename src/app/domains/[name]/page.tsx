@@ -12,6 +12,7 @@ import useFetch from '@/services/api/use-fetch'
 import useAuth from '@/services/auth/use-auth';
 import withPageRequiredAuth from '@/services/auth/with-page-required-auth';
 import { useRouter } from "next/navigation";
+import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
 
  function Bid() {
   const [ domainId, setDomainId] = useState<string>('');
@@ -21,6 +22,10 @@ import { useRouter } from "next/navigation";
   const [canBid, setCanBid] = useState(false);
   const [canLease, setCanLease] = useState(false);
   const [canMakeOffer, setCanMakeOffer] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
   const pathname = usePathname();
   const fetch = useFetch();
   const {user} = useAuth();
@@ -163,6 +168,7 @@ import { useRouter } from "next/navigation";
     }
   };
   const handleLeaseNow = async () => {
+    closeModal();
     if (!currentDomain) {
       setErrorMessage("Domain details not available.");
       return;
@@ -187,8 +193,7 @@ import { useRouter } from "next/navigation";
       const result = await wrapperFetchJsonResponse(response);
       const data = result.data as any
       if (result.status === 201 && data.payment_url) {
-        console.log("Payment URL:", data.payment_url);
-        window.open(data.payment_url, "_blank");
+        router.push("/dashboard/my-payments"); 
       } else {
         const res = result.data as any
         //alert(res.errors.message);
@@ -254,9 +259,15 @@ import { useRouter } from "next/navigation";
             <small className="text-muted mb-2">
               Secure this premium domain instantly by leasing it at the set price
             </small>
-            <Button variant="secondary" className="self-start" onClick={handleLeaseNow} disabled={!canLease}>
-              Lease Now
-            </Button>
+            <div>
+              {/* Lease Now Button */}
+              <Button variant="secondary" onClick={openModal}>
+                Lease Now
+              </Button>
+
+              {/* Confirm Lease Modal */}
+              <ConfirmLeaseModal isOpen={isModalOpen} onClose={closeModal} onConfirm={handleLeaseNow} />
+            </div>
           </div>
 
           <hr className="my-5" />

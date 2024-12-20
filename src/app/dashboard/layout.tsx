@@ -23,11 +23,12 @@ export default function Layout({
                         <Link href="/dashboard/my-domains" className={pathname == '/dashboard/my-domains' ? 'font-bold text-secondary' : 'text-white'}>My Domains</Link>
                     </li>
                     <li>
+                        <Link href="/dashboard/my-payments" className={pathname == '/payment' ? 'font-bold text-secondary' : 'text-white'}>My Payments</Link>
+                    </li>
+                    <li>
                         <Link href="/dashboard/settings" className={pathname == '/dashboard/settings' ? 'font-bold text-secondary' : 'text-white'}>Settings</Link>
                     </li>
-                    {/* <li>
-                        <Link href="/payment" className={pathname == '/payment' ? 'font-bold text-secondary' : 'text-white'}>Payments</Link>
-                    </li> */}
+                  
                 </ul>
 
                 <div className='grow-[3] h-full'>
