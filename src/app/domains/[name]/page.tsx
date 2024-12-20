@@ -25,7 +25,8 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-
+  const [timeRemaining, setTimeRemaining] = useState<string | null>(null); 
+  const [isAuctionEnded, setIsAuctionEnded] = useState(false);
   const pathname = usePathname();
   const fetch = useFetch();
   const {user} = useAuth();
@@ -204,6 +205,43 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
       setErrorMessage("An error occurred. Please try again later.");
     }
   };
+
+ useEffect(() => {
+  if (currentDomain?.end_time) {
+    const intervalId = setInterval(() => {
+      const { time, isEnded } = formatTimeRemaining(currentDomain.end_time);
+      setTimeRemaining(time);
+      setIsAuctionEnded(isEnded); // Set the auction ended state
+    }, 1000);
+
+    return () => clearInterval(intervalId); // Clear the interval when component unmounts
+  }
+}, [currentDomain]);
+  
+  const formatTimeRemaining = (endTime: Date) => {
+    const countdownEnd = new Date(endTime).getTime();  // Get the auction end time in milliseconds
+    const now = new Date().getTime();  // Current time in milliseconds
+  
+    const distance = countdownEnd - now;  // Difference between current time and auction end time
+  
+    if (distance <= 0) {
+      return { time: 'Auction ended', isEnded: true }; // Auction has ended
+    }
+  
+    // Calculate hours, minutes, and seconds
+    const hours = Math.floor(distance / (1000 * 60 * 60)); // Hours are calculated based on total milliseconds
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)); // Minutes are the remainder after hours
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000); // Seconds are the remainder after minutes
+  
+    // Ensure all values are always two digits
+    const formattedHours = hours < 10 ? "0" + hours : hours;
+    const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+    const formattedSeconds = seconds < 10 ? "0" + seconds : seconds;
+  
+    return { time: `${formattedHours}:${formattedMinutes}:${formattedSeconds}`, isEnded: false };
+  };
+  
+
   
 
   
@@ -221,7 +259,14 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
       <div className="flex mx-24 mb-10 items-center gap-10 h-full">
         <div className="w-full h-full">
           <h2 className="text-xl my-10">Choose your option to gain access to {currentDomain?.url}</h2>
-
+          {/* Countdown Timer */}
+          <div className="mb-4">
+            {currentDomain?.end_time && (
+              <div className={`text-lg font-semibold text-red-500 }`}>
+                {isAuctionEnded ? 'Auction ended' : `Auction ends in: ${timeRemaining}`}
+              </div>
+            )}
+          </div>
           <div className="flex flex-col">
             <label className="text-lg">Place your Bid</label>
             <strong className="text-secondary">Current Bid: {currentDomain?.current_bid}</strong>
@@ -240,11 +285,11 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
             </small>
             {/* Conditionally render buttons */}
             {canBid ? (
-                <Button variant="secondary" className="self-start" onClick={handlePlaceBid}>
+                <Button variant="secondary" className="self-start" onClick={handlePlaceBid} disabled={isAuctionEnded}>
                 Place Bid
                 </Button>
             ) : (
-                <Button variant="secondary" className="self-start" onClick={handleIncreaseBid}>
+                <Button variant="secondary" className="self-start" onClick={handleIncreaseBid} disabled={isAuctionEnded}>
                 Increase Bid
                 </Button>
             )}
@@ -261,7 +306,7 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
             </small>
             <div>
               {/* Lease Now Button */}
-              <Button variant="secondary" onClick={openModal}>
+              <Button variant="secondary" onClick={openModal} disabled={!canLease || isAuctionEnded}>
                 Lease Now
               </Button>
 
@@ -280,7 +325,7 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
             <small className="text-muted mb-2">
               Secure this premium domain instantly by leasing it at the set price
             </small>
-            <Button variant="secondary" className="self-start" disabled={!canMakeOffer}>
+            <Button variant="secondary" className="self-start" disabled={!canMakeOffer || isAuctionEnded}>
               Make Offer
             </Button>
           </div>
