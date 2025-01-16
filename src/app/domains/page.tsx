@@ -10,20 +10,30 @@ import Link from "next/link";
 import Countdown from "../components/Countdown";
 import useDomainActions from "@/services/domains/use-domains-actions";
 import { Domain } from "@/services/domains/domains-context";
+import { useSearchParams } from "next/navigation";
 
 export default function Domains() {
   const { selectDomain } = useDomainActions();
+  const searchParams = useSearchParams();
+  const searchedText = ((searchParams.get("search") && (searchParams.get("search") as string).length) ? searchParams.get("search") : '') as string;
 
   const handleSelectDomain = (domain: Domain) => {
     selectDomain(domain);
   };
-
+  
   const [domains, setDomains] = useState<any[]>([]);
   const [filteredDomains, setFilteredDomains] = useState<any[]>([]);
   const [expiredDomains, setExpiredDomains] = useState<string[]>([]); // Track expired domains
   const [total, setTotal] = useState<number>(0);
-  const [searchText, setSearchText] = useState<string>("");
+  const [searchText, setSearchText] = useState<string>('');
   const fetch = useFetch();
+
+  useEffect(() => {
+    if (!searchedText || !searchedText.length) return;
+    if (!filteredDomains.length) return;
+
+    setSearchText(searchedText);
+  }, [searchedText, domains]);
 
   const getDomains = async () => {
     const requestUrl = new URL(`${API_URL}/v1/auctions/available/domain`);
@@ -85,21 +95,21 @@ export default function Domains() {
           alt="Banner"
           className="absolute w-full h-full object-cover"
         />
-        <div className="absolute w-full text-white mt-[120px] py-5 px-24">
-          <h1 className="text-4xl font-semibold">
+        <div className="absolute w-full text-white mt-[60px] lg:mt-[120px] py-5 px-5 lg:px-60">
+          <h1 className="text-2xl lg:text-4xl font-semibold">
             Find your next domains within minutes...
           </h1>
-          <p className="mt-5 text-muted">
+          <p className="text-sm lg:text-md mt-5 text-muted">
             Discover premium domains, place bids, or lease instantly. Start your
             search now and secure the perfect name for your project!
           </p>
         </div>
       </div>
 
-      <div className="-mt-[90px] mx-24 px-10 bg-primary p-10 px-24 flex flex-col gap-5 rounded-md">
+      <div className="-mt-[90px] mx-5 lg:mx-60 px-5 lg:px-10 bg-primary p-10 px-24 flex flex-col gap-5 rounded-md">
         <h2 className="text-muted text-2xl">Search for a domain</h2>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col lg:flex-row gap-2">
           <Input
             placeholder="Search for a domain name..."
             onChange={(e) => setSearchText(e.target.value)}
@@ -109,50 +119,50 @@ export default function Domains() {
         </div>
       </div>
 
-      <div className="mx-24 my-[12px]">
+      <div className="mx-5 lg:mx-60 my-[12px]">
         <strong>{total} results found</strong>
 
-        <ul className="flex flex-col gap-3 mt-5">
+        <ul className="grid grid-cols-1 lg:grid-cols-2 gap-3 mt-5">
           {filteredDomains.length ? (
             filteredDomains.map((domain: any, i: number) => (
               <li
                 key={i}
-                className="flex items-center justify-between bg-primary text-white rounded-md p-5"
+                className={`flex flex-col bg-primary text-white rounded-md p-5 ${filteredDomains.length === 1 ? "col-span-2" : ""}`}
               >
-                <div className="flex flex-col gap-3 w-full">
-                  {domain.url}
+                <p className="pb-5 text-secondary font-bold">{domain.url}</p>
 
-                  <div className="flex flex-col">
+                <div className="flex flex-col lg:flex-row gap-3 w-full">
+                  <div className="flex flex-col w-full">
                     <label className="font-bold">Price:</label>
                     <span>${domain.current_bid}</span>
                   </div>
-                </div>
 
-                <div className="flex flex-col gap-3 w-full">
-                  <div className="flex flex-col">
-                    <label className="font-bold">Number of bids:</label>
+                  <div className="flex flex-col w-full">
+                    <label className="font-bold">Bids:</label>
                     <span>{domain.total_bids}</span>
                   </div>
-                  <div className="flex flex-col">
+
+                  <div className="flex flex-col w-full">
                     <label className="font-bold">Time left:</label>
                     <Countdown
                       endTime={domain.end_time}
                       onEnd={() => handleCountdownEnd(domain.id)} // Trigger the expiration handler
                     />
                   </div>
+
+                  {/* Button disappears when domain is expired */}
+                  {!expiredDomains.includes(domain.id) && (
+                    <Button
+                      variant="secondary"
+                      className="w-full"
+                      asChild
+                      onClick={() => handleSelectDomain(domain)} // Handle domain selection
+                    >
+                      <Link href={`/domains/${domain.id}`}>Bid now</Link>
+                    </Button>
+                  )}
                 </div>
 
-                {/* Button disappears when domain is expired */}
-                {!expiredDomains.includes(domain.id) && (
-                  <Button
-                    variant="secondary"
-                    className="w-full"
-                    asChild
-                    onClick={() => handleSelectDomain(domain)} // Handle domain selection
-                  >
-                    <Link href={`/domains/${domain.id}`}>Bid now</Link>
-                  </Button>
-                )}
               </li>
             ))
           ) : (

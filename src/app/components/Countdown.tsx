@@ -37,7 +37,7 @@ const Countdown: React.FC<CountdownProps> = ({ endTime, onEnd }) => {
     return () => clearInterval(interval); // Cleanup interval on unmount
   }, [endTime]); // Only depend on `endTime` to avoid unnecessary re-renders
 
-  return <span>{timeLeft}</span>;
+  return <span className="text-yellow-400">{timeLeft}</span>;
 };
 
 export default Countdown;

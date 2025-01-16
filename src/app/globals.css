@@ -140,3 +140,12 @@ body {
 body[data-scroll-locked]{
   min-width: 100%;
 }
+
+/* Hide scrollbar while allowing scrolling */
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hidden {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}

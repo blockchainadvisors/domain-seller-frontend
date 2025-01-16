@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,8 +14,8 @@ import withPageRequiredAuth from '@/services/auth/with-page-required-auth';
 import { useRouter } from "next/navigation";
 import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
 
- function Bid() {
-  const [ domainId, setDomainId] = useState<string>('');
+function Bid() {
+  const [domainId, setDomainId] = useState<string>('');
   const [currentDomain, setCurrentDomain] = useState<Domain | undefined>(undefined);
   const [bidAmount, setBidAmount] = useState<number | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -25,12 +25,12 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-  const [timeRemaining, setTimeRemaining] = useState<string | null>(null); 
+  const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
   const [isAuctionEnded, setIsAuctionEnded] = useState(false);
   const pathname = usePathname();
   const fetch = useFetch();
-  const {user} = useAuth();
-  const router = useRouter(); 
+  const { user } = useAuth();
+  const router = useRouter();
 
 
   // Fetch domain by ID from the API
@@ -55,12 +55,12 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
     canMakeOffer: boolean;
   };
 
-   // Fetch validation data for the auction
-   const fetchAuctionValidation = async (auctionId: string) => {
+  // Fetch validation data for the auction
+  const fetchAuctionValidation = async (auctionId: string) => {
     try {
       const requestUrl = new URL(`${API_URL}/v1/auctions/validate/auction/${auctionId}`);
       const res = await fetch(requestUrl.toString(), { method: "GET" });
-      const { status, data } =  await wrapperFetchJsonResponse(res);
+      const { status, data } = await wrapperFetchJsonResponse(res);
       const newData = data as AuctionValidationResponse
       if (status >= 200 && data) {
         setCanBid(newData.canBid);
@@ -76,8 +76,8 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
   useEffect(() => {
     const domainId = pathname.split('/').pop();
     if (domainId) {
-        setDomainId(domainId)
-       fetchDomainById(domainId).then((domain) => {
+      setDomainId(domainId)
+      fetchDomainById(domainId).then((domain) => {
         setCurrentDomain(domain as any);
         fetchAuctionValidation(domainId);
       });
@@ -98,7 +98,7 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
 
     const payload = {
       amount: bidAmount,
-      user_id: user?.id, 
+      user_id: user?.id,
       domain_id: currentDomain.domain_id,
       auction_id: currentDomain.id, // Assuming auction_id is the same as domain_id
     };
@@ -115,7 +115,7 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
         setErrorMessage(null);
         alert("Bid placed successfully!");
         // Redirect to "My Bids" page
-         router.push("/dashboard/my-bids");   
+        router.push("/dashboard/my-bids");
       } else {
         const res = result.data as any
         //alert(res.errors.message);
@@ -156,7 +156,7 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
         setErrorMessage(null);
         alert("Bid placed successfully!");
         // Redirect to "My Bids" page
-         router.push("/dashboard/my-bids");   
+        router.push("/dashboard/my-bids");
       } else {
         //console.log(result.data)
         const res = result.data as any
@@ -174,14 +174,14 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
       setErrorMessage("Domain details not available.");
       return;
     }
-  
+
     const payload = {
       domain_id: currentDomain.domain_id,
       auction_id: currentDomain.id, // Assuming auction_id is the same as domain_id
     };
-  
+
     const requestUrl = new URL(`${API_URL}/v1/bids/lease/now`);
-  
+
     try {
       const response = await fetch(requestUrl.toString(), {
         method: "POST",
@@ -190,11 +190,11 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
         },
         body: JSON.stringify(payload),
       });
-  
+
       const result = await wrapperFetchJsonResponse(response);
       const data = result.data as any
       if (result.status === 201 && data.payment_url) {
-        router.push("/dashboard/my-payments"); 
+        router.push("/dashboard/my-payments");
       } else {
         const res = result.data as any
         //alert(res.errors.message);
@@ -206,64 +206,59 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
     }
   };
 
- useEffect(() => {
-  if (currentDomain?.end_time) {
-    const intervalId = setInterval(() => {
-      const { time, isEnded } = formatTimeRemaining(currentDomain.end_time);
-      setTimeRemaining(time);
-      setIsAuctionEnded(isEnded); // Set the auction ended state
-    }, 1000);
+  useEffect(() => {
+    if (currentDomain?.end_time) {
+      const intervalId = setInterval(() => {
+        const { time, isEnded } = formatTimeRemaining(currentDomain.end_time);
+        setTimeRemaining(time);
+        setIsAuctionEnded(isEnded); // Set the auction ended state
+      }, 1000);
 
-    return () => clearInterval(intervalId); // Clear the interval when component unmounts
-  }
-}, [currentDomain]);
-  
+      return () => clearInterval(intervalId); // Clear the interval when component unmounts
+    }
+  }, [currentDomain]);
+
   const formatTimeRemaining = (endTime: Date) => {
     const countdownEnd = new Date(endTime).getTime();  // Get the auction end time in milliseconds
     const now = new Date().getTime();  // Current time in milliseconds
-  
+
     const distance = countdownEnd - now;  // Difference between current time and auction end time
-  
+
     if (distance <= 0) {
       return { time: 'Auction ended', isEnded: true }; // Auction has ended
     }
-  
+
     // Calculate hours, minutes, and seconds
     const hours = Math.floor(distance / (1000 * 60 * 60)); // Hours are calculated based on total milliseconds
     const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)); // Minutes are the remainder after hours
     const seconds = Math.floor((distance % (1000 * 60)) / 1000); // Seconds are the remainder after minutes
-  
+
     // Ensure all values are always two digits
     const formattedHours = hours < 10 ? "0" + hours : hours;
     const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
     const formattedSeconds = seconds < 10 ? "0" + seconds : seconds;
-  
+
     return { time: `${formattedHours}:${formattedMinutes}:${formattedSeconds}`, isEnded: false };
   };
-  
-
-  
-
-  
 
   return (
     <div className="w-full">
       <div className="relative w-full h-[40vh] -z-[1]">
         <img src="/domains-bid-banner.png" alt="Banner" className="absolute w-full h-full object-cover" />
-        <div className="absolute w-full text-white mt-[120px] py-5 px-24 text-center">
-          <h1 className="text-4xl font-semibold">Unlock your brand with</h1>
-          <p className="text-3xl mt-2">{currentDomain?.url}</p>
+        <div className="absolute w-full text-white mt-[120px] py-5 px-5 lg:px-24 text-center">
+          <h1 className="text-2xl lg:text-4xl font-semibold">Unlock your brand with</h1>
+          <p className="text-lg lg:text-3xl mt-2">{currentDomain?.url}</p>
         </div>
       </div>
 
-      <div className="flex mx-24 mb-10 items-center gap-10 h-full">
+      <div className="flex mx-5 lg:mx-24 mb-10 items-center gap-10 h-full">
         <div className="w-full h-full">
           <h2 className="text-xl my-10">Choose your option to gain access to {currentDomain?.url}</h2>
           {/* Countdown Timer */}
           <div className="mb-4">
             {currentDomain?.end_time && (
               <div className={`text-lg font-semibold text-red-500 }`}>
-                {isAuctionEnded ? 'Auction ended' : `Auction ends in: ${timeRemaining}`}
+                {isAuctionEnded ? 'Auction ended' : `Auction ends in: ${timeRemaining ?? '...'}`}
               </div>
             )}
           </div>
@@ -285,13 +280,13 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
             </small>
             {/* Conditionally render buttons */}
             {canBid ? (
-                <Button variant="secondary" className="self-start" onClick={handlePlaceBid} disabled={isAuctionEnded}>
+              <Button variant="secondary" className="self-start" onClick={handlePlaceBid} disabled={isAuctionEnded}>
                 Place Bid
-                </Button>
+              </Button>
             ) : (
-                <Button variant="secondary" className="self-start" onClick={handleIncreaseBid} disabled={isAuctionEnded}>
+              <Button variant="secondary" className="self-start" onClick={handleIncreaseBid} disabled={isAuctionEnded}>
                 Increase Bid
-                </Button>
+              </Button>
             )}
           </div>
 
@@ -331,7 +326,7 @@ import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
           </div>
         </div>
 
-        <div className="h-full w-full">
+        <div className="hidden lg:block h-full w-full">
           <img src="/domain-bid-overview.png" alt="Domain Bid Overview" />
         </div>
       </div>

@@ -3,7 +3,7 @@ import React from 'react'
 export default function Footer() {
   return (
     <div className='flex flex-col justify-center gap-10 text-center text-sm bg-primary text-white p-10'>
-        <div className="flex justify-center gap-10">
+        <div className="flex flex-col md:flex-row justify-center gap-10">
             <ul className='flex flex-col gap-3'>
                 <li>Domains</li>
                 <li>Owners</li>

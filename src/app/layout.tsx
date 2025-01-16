@@ -4,7 +4,8 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import AuthProvider from "@/services/auth/auth-provider";
-import DomainProvider  from "@/services/domains/domains-provider";
+import DomainProvider from "@/services/domains/domains-provider";
+import { MyDomainsProvider } from "@/services/domains/my-domains-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,13 +34,20 @@ export default function RootLayout({
         className={`flex flex-col min-h-screen ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-        <DomainProvider>  
-          <Navbar />
-          <div className="flex-grow">
-            {children}
-          </div>
-          <Footer />
-          </DomainProvider>
+          <MyDomainsProvider>
+            <DomainProvider>
+              {/* Header */}
+              <Navbar />
+
+              {/* Main Content: Flex-grow ensures it stretches */}
+              <main className="flex-grow flex flex-col">
+                {children}
+              </main>
+
+              {/* Footer: Pushed to the bottom */}
+              <Footer />
+            </DomainProvider>
+          </MyDomainsProvider>
         </AuthProvider>
       </body>
     </html>

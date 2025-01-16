@@ -13,6 +13,7 @@ import withPageRequiredAuth from "@/services/auth/with-page-required-auth";
 import { API_URL } from "@/services/api/config";
 import wrapperFetchJsonResponse from "@/services/api/wrapper-fetch-json-response";
 import useFetch from '@/services/api/use-fetch'
+import Link from "next/link";
 
 
 type Domain = {
@@ -101,7 +102,11 @@ function MyDomains() {
 
                             return (
                                 <TableRow key={domain.id}>
-                                    <TableCell className="font-medium">{domain.url}</TableCell>
+                                    <TableCell className="font-medium">
+                                        <Link href={`/dashboard/my-domains/${domain.id}`}>
+                                            {domain.url}
+                                        </Link>
+                                    </TableCell>
                                     <TableCell>{new Date(domain.registration_date).toLocaleDateString()}</TableCell>
                                     <TableCell>{expirationDate.toLocaleDateString()}</TableCell>
                                     <TableCell>${domain.renewal_price}</TableCell>

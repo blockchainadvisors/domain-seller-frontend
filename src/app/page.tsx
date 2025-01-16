@@ -14,15 +14,20 @@ import { API_URL } from "@/services/api/config";
 import wrapperFetchJsonResponse from "@/services/api/wrapper-fetch-json-response";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [popularDomains, setPopularDomains] = useState<any[]>([]);
+  const [availableExensions, setAvailableExtensions] = useState<string[]>([]);
+  const [chosenExtension, setChosenExtension] = useState<string>('');
+  const [searchDomain, setSearchDomain] = useState<string>('');
 
+  const router = useRouter();
   const fetch = useFetch();
 
   const getDomains = async () => {
     const requestUrl = new URL(`${API_URL}/v1/auctions/available/domain`);
-    
+
     const res = await fetch(requestUrl, {
       method: "GET"
     });
@@ -35,47 +40,67 @@ export default function Home() {
     }
   }
 
+  const handleChosenExtension = () => {
+    const domainSearch = `${searchDomain}.${chosenExtension}`;
+    router.push(`domains?search=${domainSearch}`);
+  }
+
   useEffect(() => {
     (async () => {
       await getDomains();
     })();
   }, []);
 
+  // Needs improvement but will work for now, better to do this in the backend
+  useEffect(() => {
+    if (!popularDomains) return;
+
+    const extensions = [...new Set(popularDomains.map(domain => domain.url.split(".")[1]))];
+    setAvailableExtensions(extensions);
+    setChosenExtension(extensions[0]);
+
+  }, [popularDomains]);
+
   return (
     <div className="relative min-h-screen font-[family-name:var(--font-geist-sans)]">
       {/* Hero */}
       <div className="relative hero bg-primary text-white h-[100vh] w-full flex flex-col justify-center gap-5 items-center pb-[150px]">
-        <h1 className="flex gap-2 text-6xl flex-col font-semibold text-center z-[3]">
-          <div className="flex gap-4 items-center justify-center">
-            Lease a <SparklesText text="premium" className="text-secondary" />
+        <h1 className="flex gap-2 text-5xl lg:text-6xl flex-col font-semibold text-center z-[3]">
+          <div className="block lg:flex gap-4 items-center justify-center">
+            Lease a <SparklesText text="premium" className="text-secondary hidden lg:inline" /> <span className="inline lg:hidden">premium</span>
           </div>
           <div className="flex gap-2 items-center justify-center">
             domain <span className="curve">today</span>
           </div>
         </h1>
 
-        <p className="text-center text-muted">Elevate your online presence with our superior hosting and<br />domain services</p>
+        <p className="text-sm lg:text-md text-center text-muted">Elevate your online presence with our superior hosting and<br />domain services</p>
 
-        <div className="flex">
-          <Input type="email" placeholder="Find your domain name" className="w-max rounded-tr-none rounded-br-none" />
+        {
+          availableExensions.length ?
+            <div className="flex">
+              <Input type="email" placeholder="Find your domain name" className="w-max rounded-tr-none rounded-br-none"  value={searchDomain} onChange={(e) => setSearchDomain(e.target.value)} />
 
-          <Select>
-            <SelectTrigger className="w-[80px] rounded-none">
-              <SelectValue placeholder=".com" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value=".com">.com</SelectItem>
-              <SelectItem value=".net">.net</SelectItem>
-              <SelectItem value=".org">.org</SelectItem>
-            </SelectContent>
-          </Select>
+              <Select onValueChange={setChosenExtension}>
+                <SelectTrigger className="w-[80px] rounded-none">
+                  <SelectValue placeholder={chosenExtension} />
+                </SelectTrigger>
+                <SelectContent>
+                  {
+                    availableExensions.map((extension, key) => (
+                      <SelectItem value={extension} key={key}>{extension}</SelectItem>
+                    ))
+                  }
+                </SelectContent>
+              </Select>
 
-          <Button variant="secondary" className="rounded-tl-none rounded-bl-none">Search</Button>
-        </div>
+              <Button variant="secondary" className="rounded-tl-none rounded-bl-none" onClick={handleChosenExtension}>Search</Button>
+            </div> : <></>
+        }
       </div>
 
       {/* Body */}
-      <section className="relative z-10 p-5 px-24 -mt-[80px]">
+      <section className="relative z-10 p-5 px-5 md:px-24 -mt-[80px]">
         <img src="/blob.svg" className="absolute -top-[100px] -left-[200px] -z-[1]" />
 
         <h2 className="text-5xl font-semibold text-center z-[3]">
@@ -84,7 +109,7 @@ export default function Home() {
 
         <p className="text-center text-muted my-5">Our most popular domains and categories to find your perfect match</p>
 
-        <div className="flex justify-between gap-10 bg-transparent rounded-md p-5">
+        <div className="flex flex-col lg:flex-row justify-between gap-10 bg-transparent rounded-md p-5">
           <div className="w-full">
             <span className="text-primary font-semibold text-lg">
               Popular domains
@@ -146,7 +171,7 @@ export default function Home() {
 
       <img src="/group-image-1.png" alt="Services" className="my-10 max-h-[400px] object-cover w-full" />
 
-      <section className="relative pt-24 px-24">
+      <section className="relative pt-24 px-5 md:px-24">
 
         <h2 className="text-5xl font-semibold text-center z-[3]">
           <span className="text-secondary">Why lease</span> a domain from us
@@ -158,7 +183,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 gap-4">
           <Card className="overflow-hidden border-none">
-            <img src="/card-1.png" className="object-cover w-full max-h-[300px]"/>
+            <img src="/card-1.png" className="object-cover w-full max-h-[300px]" />
 
             <CardHeader className="bg-[#E5F4E3]">
               <CardTitle>Cancel Anytime</CardTitle>
@@ -166,9 +191,9 @@ export default function Home() {
             </CardHeader>
           </Card>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card className="overflow-hidden border-none">
-              <img src="/card-2.png" className="object-cover w-full max-h-[300px]"/>
+              <img src="/card-2.png" className="object-cover w-full max-h-[300px]" />
 
               <CardHeader className="bg-[#E5F4E3]">
                 <CardTitle>Lease Forever</CardTitle>
@@ -177,7 +202,7 @@ export default function Home() {
             </Card>
 
             <Card className="overflow-hidden border-none">
-              <img src="/card-3.png" className="object-cover w-full max-h-[300px]"/>
+              <img src="/card-3.png" className="object-cover w-full max-h-[300px]" />
 
               <CardHeader className="bg-[#E5F4E3]">
                 <CardTitle>Premium names</CardTitle>
@@ -188,7 +213,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative pt-24 px-24">
+      <section className="relative pt-24 px-5 md:px-24 mb-24 md:mb-0">
         <img src="/blob.svg" className="absolute -top-[100px] -left-[200px] -z-[1]" />
 
         <div className="mb-10">
@@ -204,17 +229,19 @@ export default function Home() {
         <Slider />
       </section>
 
-      <section className="pt-24 px-24">
+      <section className="hidden lg:block pt-24 px-5 md:px-24">
         <div className="mb-10">
           <h2 className="text-5xl font-semibold text-center z-[3]">
             Reviews
           </h2>
         </div>
       </section>
-      
-      <ReviewSlider />
 
-      <section className="pt-24 px-24 mb-24">
+      <div className="hidden lg:block">
+        <ReviewSlider />
+      </div>
+
+      <section className="hidden lg:block pt-24 px-24 mb-24">
         <div className="mb-10">
           <h2 className="text-5xl font-semibold text-center z-[3]">
             Our Partners
