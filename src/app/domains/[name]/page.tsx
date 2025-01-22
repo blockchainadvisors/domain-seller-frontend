@@ -13,12 +13,15 @@ import useAuth from '@/services/auth/use-auth';
 import withPageRequiredAuth from '@/services/auth/with-page-required-auth';
 import { useRouter } from "next/navigation";
 import ConfirmLeaseModal from "@/app/components/ConfirmLeaseModal";
+import { Skeleton } from '@/components/ui/skeleton';
 
 function Bid() {
   const [domainId, setDomainId] = useState<string>('');
+  const [offerAmount, setOfferAmount] = useState<number>(0);
   const [currentDomain, setCurrentDomain] = useState<Domain | undefined>(undefined);
   const [bidAmount, setBidAmount] = useState<number | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isValidated, setIsValidated] = useState(false);
   const [canBid, setCanBid] = useState(false);
   const [canLease, setCanLease] = useState(false);
   const [canMakeOffer, setCanMakeOffer] = useState(false);
@@ -63,6 +66,7 @@ function Bid() {
       const { status, data } = await wrapperFetchJsonResponse(res);
       const newData = data as AuctionValidationResponse
       if (status >= 200 && data) {
+        setIsValidated(true);
         setCanBid(newData.canBid);
         setCanLease(newData.canLease);
         setCanMakeOffer(newData.canMakeOffer);
@@ -168,6 +172,7 @@ function Bid() {
       setErrorMessage("An error occurred. Please try again later.");
     }
   };
+
   const handleLeaseNow = async () => {
     closeModal();
     if (!currentDomain) {
@@ -206,6 +211,36 @@ function Bid() {
     }
   };
 
+  const handleMakeOffer = async () => {
+    if (!currentDomain) {
+      setErrorMessage("Domain details not available.");
+      return;
+    }
+
+    const requestUrl = new URL(`${API_URL}/v1/offers`);
+    
+    const payload = {
+      user_id: user?.id,
+      offer_amount: offerAmount,
+      auction_id: currentDomain.id, // Assuming auction_id is the same as domain_id
+    };
+
+    try {
+      const response = await fetch(requestUrl.toString(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      window.alert("Your offer has been sent!");
+    } catch (error) {
+      console.error("Error initiating lease:", error);
+      setErrorMessage("An error occurred. Please try again later.");
+    }
+  }
+
   useEffect(() => {
     if (currentDomain?.end_time) {
       const intervalId = setInterval(() => {
@@ -219,27 +254,27 @@ function Bid() {
   }, [currentDomain]);
 
   const formatTimeRemaining = (endTime: Date) => {
-    const countdownEnd = new Date(endTime).getTime();  // Get the auction end time in milliseconds
-    const now = new Date().getTime();  // Current time in milliseconds
-
-    const distance = countdownEnd - now;  // Difference between current time and auction end time
-
+    const countdownEnd = new Date(endTime).getTime(); // Get the auction end time in milliseconds
+    const now = new Date().getTime(); // Current time in milliseconds
+  
+    const distance = countdownEnd - now; // Difference between current time and auction end time
+  
     if (distance <= 0) {
       return { time: 'Auction ended', isEnded: true }; // Auction has ended
     }
-
-    // Calculate hours, minutes, and seconds
-    const hours = Math.floor(distance / (1000 * 60 * 60)); // Hours are calculated based on total milliseconds
+  
+    // Calculate days, hours, minutes, and seconds
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24)); // Days are calculated based on total milliseconds
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)); // Hours are the remainder after days
     const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)); // Minutes are the remainder after hours
     const seconds = Math.floor((distance % (1000 * 60)) / 1000); // Seconds are the remainder after minutes
-
-    // Ensure all values are always two digits
-    const formattedHours = hours < 10 ? "0" + hours : hours;
-    const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
-    const formattedSeconds = seconds < 10 ? "0" + seconds : seconds;
-
-    return { time: `${formattedHours}:${formattedMinutes}:${formattedSeconds}`, isEnded: false };
+  
+    // Construct the output string
+    const time = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  
+    return { time, isEnded: false };
   };
+  
 
   return (
     <div className="w-full">
@@ -258,7 +293,21 @@ function Bid() {
           <div className="mb-4">
             {currentDomain?.end_time && (
               <div className={`text-lg font-semibold text-red-500 }`}>
-                {isAuctionEnded ? 'Auction ended' : `Auction ends in: ${timeRemaining ?? '...'}`}
+                {
+                  isAuctionEnded ? 
+                    'Auction ended' :
+                    timeRemaining ? 
+                      `Auction ends in: ${timeRemaining}`
+                    :
+                    <div className='flex items-center gap-2'>
+                      Auction ends in: 
+                      
+                      <div className='flex flex-col gap-1'>
+                        <Skeleton className="w-[100px] h-[6px] rounded-full" />
+                        <Skeleton className="w-[50px] h-[6px] rounded-full" />
+                      </div>
+                    </div>
+                }
               </div>
             )}
           </div>
@@ -279,15 +328,22 @@ function Bid() {
               Learn more how our bidding works in our <a href="#">auction guide</a>
             </small>
             {/* Conditionally render buttons */}
-            {canBid ? (
-              <Button variant="secondary" className="self-start" onClick={handlePlaceBid} disabled={isAuctionEnded}>
-                Place Bid
-              </Button>
-            ) : (
-              <Button variant="secondary" className="self-start" onClick={handleIncreaseBid} disabled={isAuctionEnded}>
-                Increase Bid
-              </Button>
-            )}
+            { isValidated ?
+                canBid ? (
+                  <Button variant="secondary" className="self-start" onClick={handlePlaceBid} disabled={isAuctionEnded}>
+                    Place Bid
+                  </Button>
+                ) : (
+                  <Button variant="secondary" className="self-start" onClick={handleIncreaseBid} disabled={isAuctionEnded}>
+                    Increase Bid
+                  </Button>
+                )
+              : <div className='flex flex-col gap-1'>
+                  <Skeleton className='w-[100px] h-[6px] rounded-full' />
+                  <Skeleton className='w-[100px] h-[6px] rounded-full' />
+                  <Skeleton className='w-[80px] h-[6px] rounded-full' />
+                </div>
+            }
           </div>
 
           <hr className="my-5" />
@@ -316,17 +372,17 @@ function Bid() {
           <div className="flex flex-col">
             <label className="text-lg">Make Your Offer</label>
             <strong className="text-secondary">Interested in this domain? Submit your best offer</strong>
-            <Input placeholder="Enter your offer..." />
+            <Input placeholder="Enter your offer..." value={offerAmount} onChange={(e) => setOfferAmount(parseInt(e.target.value))} />
             <small className="text-muted mb-2">
               Secure this premium domain instantly by leasing it at the set price
             </small>
-            <Button variant="secondary" className="self-start" disabled={!canMakeOffer || isAuctionEnded}>
+            <Button variant="secondary" className="self-start" disabled={!canMakeOffer || isAuctionEnded} onClick={handleMakeOffer}>
               Make Offer
             </Button>
           </div>
         </div>
 
-        <div className="hidden lg:block h-full w-full">
+        <div className="hidden lg:block h-full w-full mt-5">
           <img src="/domain-bid-overview.png" alt="Domain Bid Overview" />
         </div>
       </div>

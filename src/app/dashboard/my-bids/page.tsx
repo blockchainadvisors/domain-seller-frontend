@@ -16,6 +16,7 @@ import useFetch from '@/services/api/use-fetch'
 import wrapperFetchJsonResponse from '@/services/api/wrapper-fetch-json-response'
 import { API_URL } from '@/services/api/config'
 import Link from 'next/link'
+import moment from 'moment'
 
 function MyBids() {
     const [bids, setBids] = useState<any[]>([]);
@@ -67,10 +68,10 @@ function MyBids() {
                                         </Link>
                                     </TableCell>
                                     <TableCell>
-                                        {bid.created_at}
+                                        {moment(bid.created_at).fromNow(true)} ago
                                     </TableCell>
                                     <TableCell>
-                                        {bid.auction_id.end_time}
+                                        {moment(bid.auction_id.end_time).fromNow(true)} left
                                     </TableCell>
                                     <TableCell>
                                         {bid.auction_status}

@@ -15,6 +15,7 @@ import wrapperFetchJsonResponse from "@/services/api/wrapper-fetch-json-response
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
   const [popularDomains, setPopularDomains] = useState<any[]>([]);
@@ -64,7 +65,7 @@ export default function Home() {
   return (
     <div className="relative min-h-screen font-[family-name:var(--font-geist-sans)]">
       {/* Hero */}
-      <div className="relative hero bg-primary text-white h-[100vh] w-full flex flex-col justify-center gap-5 items-center pb-[150px]">
+      <div className="relative hero bg-primary text-white h-[100vh] w-full flex flex-col justify-center gap-5 items-center pb-[150px] overflow-x-hidden">
         <h1 className="flex gap-2 text-5xl lg:text-6xl flex-col font-semibold text-center z-[3]">
           <div className="block lg:flex gap-4 items-center justify-center">
             Lease a <SparklesText text="premium" className="text-secondary hidden lg:inline" /> <span className="inline lg:hidden">premium</span>
@@ -77,25 +78,61 @@ export default function Home() {
         <p className="text-sm lg:text-md text-center text-muted">Elevate your online presence with our superior hosting and<br />domain services</p>
 
         {
-          availableExensions.length ?
-            <div className="flex">
-              <Input type="email" placeholder="Find your domain name" className="w-max rounded-tr-none rounded-br-none"  value={searchDomain} onChange={(e) => setSearchDomain(e.target.value)} />
+          availableExensions.length ? (
+            <div className="flex px-5 md:px-0">
+              <Input
+                type="email"
+                placeholder="Find your domain name"
+                className="md:w-max rounded-tr-none rounded-br-none"
+                value={searchDomain}
+                onChange={(e) => setSearchDomain(e.target.value)} // Controlled input
+              />
 
               <Select onValueChange={setChosenExtension}>
                 <SelectTrigger className="w-[80px] rounded-none">
                   <SelectValue placeholder={chosenExtension} />
                 </SelectTrigger>
                 <SelectContent>
-                  {
-                    availableExensions.map((extension, key) => (
-                      <SelectItem value={extension} key={key}>{extension}</SelectItem>
-                    ))
-                  }
+                  {availableExensions.map((extension, key) => (
+                    <SelectItem value={extension} key={key}>
+                      {extension}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
-              <Button variant="secondary" className="rounded-tl-none rounded-bl-none" onClick={handleChosenExtension}>Search</Button>
-            </div> : <></>
+              <Button
+                variant="secondary"
+                className="rounded-tl-none rounded-bl-none"
+                onClick={handleChosenExtension}
+              >
+                Search
+              </Button>
+            </div>
+          ) : (
+            <div className="flex px-5 md:px-0">
+              <Input
+                type="email"
+                placeholder="Find your domain name"
+                className="md:w-max rounded-tr-none rounded-br-none"
+                value={searchDomain} // Always define `value`
+                onChange={(e) => setSearchDomain(e.target.value)} // Same handler
+              />
+
+              <Select onValueChange={setChosenExtension}>
+                <SelectTrigger className="w-[80px] rounded-none">
+                  <SelectValue placeholder={chosenExtension} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="com">.com</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button variant="secondary" className="rounded-tl-none rounded-bl-none">
+                Search
+              </Button>
+            </div>
+          )
         }
       </div>
 

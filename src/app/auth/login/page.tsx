@@ -8,7 +8,7 @@ import useAuthActions from '@/services/auth/use-auth-actions';
 import useAuthTokens from '@/services/auth/use-auth-tokens';
 import withPageRequiredGuest from '@/services/auth/with-page-required-guest';
 import Link from 'next/link';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 function Login() {
   const { setUser } = useAuthActions();
@@ -39,8 +39,22 @@ function Login() {
     }
   }
 
+  useEffect(() => {
+    const registerKey = async (e: { key: string }) => {
+      if (e.key === "Enter") {
+        await handleSubmit();
+      }
+    }
+
+    window.addEventListener("keydown", registerKey);
+
+    return () => {
+      window.removeEventListener("keydown", registerKey);
+    }
+  }, [email, password]);
+
   return (
-    <div className='px-20'>
+    <div className='px-5 md:px-20'>
       <h1 className='text-3xl font-bold'>Sign In</h1>
 
       <div className="flex flex-col mt-2">
@@ -51,11 +65,11 @@ function Login() {
 
         <div className='py-2'>
           <label className='text-sm'>Enter Password</label>
-          <Input type="password" placeholder="Enter your password..." value={password} onChange={(e) => setPassword(e.target.value)}  />
+          <Input type="password" placeholder="Enter your password..." value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
       </div>
 
-      <div className='flex items-center justify-between'>
+      <div className='flex flex-col md:flex-row gap-5 items-center justify-between'>
         <Button variant="secondary" className="mt-2" onClick={handleSubmit}>Sign In</Button>
         <p className='text-sm'>Don't have an account? <Link href="/auth/register">Sign Up</Link></p>
       </div>

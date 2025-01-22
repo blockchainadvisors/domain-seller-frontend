@@ -4,17 +4,21 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMyDomain } from "@/services/domains/my-domains-provider";
+import useFetch from "@/services/api/use-fetch";
+import { API_URL } from "@/services/api/config";
 
 // A reusable component for contact sections
 const ContactSection = ({
   title,
   contactData,
   setContactData,
+  handleSubmit,
   fieldPath = {},
 }: {
   title: string;
   contactData: Record<string, any>;
   setContactData: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+  handleSubmit: any;
   fieldPath?: Record<string, string>; // Maps input names to nested paths
 }) => {
   const getNestedValue = (path: string): string => {
@@ -90,6 +94,17 @@ const ContactSection = ({
           />
         </div>
 
+        <div className="flex flex-col gap-1">
+          <label className="font-semibold">Fax</label>
+          <Input
+            placeholder="Fax"
+            value={getNestedValue(fieldPath.fax || "fax")}
+            onChange={(e) =>
+              setNestedValue(fieldPath.fax || "fax", e.target.value)
+            }
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <div className="flex flex-col gap-1">
             <label className="font-semibold">Address 1</label>
@@ -159,13 +174,14 @@ const ContactSection = ({
         </div>
       </div>
 
-      <Button className="self-end">Save</Button>
+      <Button className="self-end" onClick={handleSubmit}>Save</Button>
     </div>
   );
 };
 
 
 export default function ContactInfo() {
+  const fetch = useFetch();
   const { domain } = useMyDomain();
 
   const [adminContact, setAdminContact] = useState<Record<string, any>>({});
@@ -182,6 +198,28 @@ export default function ContactInfo() {
     setTechContact(domain.contactTech || {});
   }, [domain]);
 
+  const handleSubmit = async () => {
+    const requestUrl = new URL(`${API_URL}/v1/dns-settings/domains/${domain}/contacts`);
+
+    let info = {
+      contactAdmin: adminContact,
+      contactBilling: billingContact,
+      contactRegistrant: registrantContact,
+      contactTech: techContact
+    };
+
+    try {
+      await fetch(requestUrl, {
+        method: "PATCH",
+        body: JSON.stringify(info)
+      });
+
+      window.alert("Contacts were updated!");
+    } catch(err) {
+      console.log(err);
+    }   
+  }
+
   return (
     domain ? (
       <div className="flex flex-col gap-5 mt-5">
@@ -190,21 +228,25 @@ export default function ContactInfo() {
           title="Admin Contact"
           contactData={adminContact}
           setContactData={setAdminContact}
+          handleSubmit={handleSubmit}
         />
         <ContactSection
           title="Billing Contact"
           contactData={billingContact}
           setContactData={setBillingContact}
+          handleSubmit={handleSubmit}
         />
         <ContactSection
           title="Registrant Contact"
           contactData={registrantContact}
           setContactData={setRegistrantContact}
+          handleSubmit={handleSubmit}
         />
         <ContactSection
           title="Tech Contact"
           contactData={techContact}
           setContactData={setTechContact}
+          handleSubmit={handleSubmit}
         />
       </div>
     ) : (

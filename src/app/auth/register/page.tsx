@@ -60,7 +60,7 @@ function Register() {
   }
 
   return (
-    <div className='px-20'>
+    <div className='px-5 md:px-20'>
       <h1 className='text-3xl font-bold'>Register</h1>
 
       <div className="flex flex-col mt-2">
@@ -91,7 +91,7 @@ function Register() {
         </div>
       </div>
 
-      <div className='flex items-center justify-between'>
+      <div className='flex flex-col md:flex-row gap-2 items-center justify-between'>
         <Button variant="secondary" className="mt-2" onClick={handleRegister}>Register</Button>
         <p className='text-sm'>Have an account? <Link href="/auth/login">Sign In</Link></p>
       </div>

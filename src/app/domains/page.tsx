@@ -20,7 +20,7 @@ export default function Domains() {
   const handleSelectDomain = (domain: Domain) => {
     selectDomain(domain);
   };
-  
+
   const [domains, setDomains] = useState<any[]>([]);
   const [filteredDomains, setFilteredDomains] = useState<any[]>([]);
   const [expiredDomains, setExpiredDomains] = useState<string[]>([]); // Track expired domains
@@ -131,7 +131,7 @@ export default function Domains() {
               >
                 <p className="pb-5 text-secondary font-bold">{domain.url}</p>
 
-                <div className="flex flex-col lg:flex-row gap-3 w-full">
+                <div className="flex flex-col lg:flex-row gap-3 w-full mb-5">
                   <div className="flex flex-col w-full">
                     <label className="font-bold">Price:</label>
                     <span>${domain.current_bid}</span>
@@ -149,19 +149,19 @@ export default function Domains() {
                       onEnd={() => handleCountdownEnd(domain.id)} // Trigger the expiration handler
                     />
                   </div>
-
-                  {/* Button disappears when domain is expired */}
-                  {!expiredDomains.includes(domain.id) && (
-                    <Button
-                      variant="secondary"
-                      className="w-full"
-                      asChild
-                      onClick={() => handleSelectDomain(domain)} // Handle domain selection
-                    >
-                      <Link href={`/domains/${domain.id}`}>Bid now</Link>
-                    </Button>
-                  )}
                 </div>
+
+                {/* Button disappears when domain is expired */}
+                {!expiredDomains.includes(domain.id) && (
+                  <Button
+                    variant="secondary"
+                    className="w-full"
+                    asChild
+                    onClick={() => handleSelectDomain(domain)} // Handle domain selection
+                  >
+                    <Link href={`/domains/${domain.id}`}>Bid now</Link>
+                  </Button>
+                )}
 
               </li>
             ))

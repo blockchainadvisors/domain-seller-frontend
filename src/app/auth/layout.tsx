@@ -6,7 +6,7 @@ export default function Layout({
     children: React.ReactNode;
   }>) {
   return (
-    <div className='flex gap-10 justify-between mt-[120px] mb-10 px-10'>
+    <div className='flex flex-col md:flex-row gap-10 justify-between mt-[120px] mb-10 px-5 md:px-10'>
         <div className='w-full mt-20'>
             {children}
         </div>

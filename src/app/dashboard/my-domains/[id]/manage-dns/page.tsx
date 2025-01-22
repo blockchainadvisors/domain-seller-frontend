@@ -37,7 +37,6 @@ import { useMyDomain } from '@/services/domains/my-domains-provider'
 import useFetch from '@/services/api/use-fetch'
 import { API_URL } from '@/services/api/config'
 import { useParams } from 'next/navigation'
-import wrapperFetchJsonResponse from '@/services/api/wrapper-fetch-json-response'
 
 export default function DnsRecords() {
     const fetch = useFetch();
@@ -55,8 +54,9 @@ export default function DnsRecords() {
     const [editingRecord, setEditingRecord] = useState({});
 
     useEffect(() => {
-        if (domain)
-            setData(domain.dnsRecords)
+        if (!domain) return;
+
+        setData(domain.dnsRecords);
     }, [domain]);
 
     const handleAddRecord = async () => {
@@ -109,8 +109,8 @@ export default function DnsRecords() {
             });
     
             if (res.ok) {
-                console.log("Record saved!", data);
                 setEditing(-1);
+                console.log("Record saved!", data);
                 window.alert("Record has been updated");
             }
         } catch(err) {

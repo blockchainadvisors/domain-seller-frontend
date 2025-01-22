@@ -24,11 +24,14 @@ const Countdown: React.FC<CountdownProps> = ({ endTime, onEnd }) => {
         return; // No need to continue the countdown after expiration
       }
 
-      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-      setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+      setTimeLeft(
+        `${days > 0 ? `${days}d ` : ""}${hours}h ${minutes}m ${seconds}s`
+      );
     };
 
     calculateTimeLeft(); // Initialize immediately
