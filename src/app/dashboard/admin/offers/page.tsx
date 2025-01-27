@@ -16,10 +16,17 @@ import { Input } from '@/components/ui/input'
 import useFetch from '@/services/api/use-fetch'
 import { API_URL } from '@/services/api/config'
 import moment from 'moment'
+import withPageRequiredAuth from '@/services/auth/with-page-required-auth'
+import { toast } from 'react-toastify'
+import { RoleEnum } from '@/services/api/types/role'
 
-export default function Offers() {
+function Offers() {
   const fetch = useFetch();
   const [offers, setOffers] = useState<any[]>([]);
+
+  const [acceptDialog, setAcceptDialog] = useState<boolean>(false);
+  const [declineDialog, setDeclineDialog] = useState<boolean>(false);
+  const [refresh, setRefresh] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
@@ -28,35 +35,78 @@ export default function Offers() {
       const availableOffers = []; // Array to store the results
 
       while (hasNextPage) {
-          const requestUrl = new URL(`${API_URL}/v1/offers?page=${currentPage}`);
+        const requestUrl = new URL(`${API_URL}/v1/offers?page=${currentPage}`);
 
-          try {
-              const res = await fetch(requestUrl);
-              if (!res.ok) {
-                  throw new Error(`Error fetching page ${currentPage}: ${res.statusText}`);
-              }
-
-              const body = await res.json();
-
-              // Add the current page's data to the domains array
-              if (body.data) {
-                availableOffers.push(...body.data); // Assuming data.items contains the domains
-              }
-
-              // Update hasNextPage and increment the page number
-              hasNextPage = body.hasNextPage;
-              currentPage++;
-          } catch (error) {
-              console.error(`Failed to fetch data for page ${currentPage}:`, error);
-              break; // Exit the loop on error
+        try {
+          const res = await fetch(requestUrl);
+          if (!res.ok) {
+            throw new Error(`Error fetching page ${currentPage}: ${res.statusText}`);
           }
+
+          const body = await res.json();
+
+          // Add the current page's data to the domains array
+          if (body.data) {
+            availableOffers.push(...body.data); // Assuming data.items contains the domains
+          }
+
+          // Update hasNextPage and increment the page number
+          hasNextPage = body.hasNextPage;
+          currentPage++;
+        } catch (error) {
+          console.error(`Failed to fetch data for page ${currentPage}:`, error);
+          break; // Exit the loop on error
+        }
       }
 
       // Only show pending offers
       setOffers(availableOffers.filter(offer => (offer.status == "PENDING")));
+      setRefresh(false);
     })();
-  }, []);
-  
+  }, [refresh]);
+
+  const handleAcceptOffer = async (offerId: string) => {
+    try {
+      const requestUrl = new URL(`${API_URL}/v1/offers/approve/${offerId}`);
+
+      const res = await fetch(requestUrl, {
+        method: "PATCH"
+      });
+
+      if (res.ok) {
+        toast.success("You have approved this offer!");
+      } else {
+        toast.error("Something has gone wrong!");
+      }
+    } catch (err) {
+      toast.error("Something has gone wrong!");
+      console.log(err);
+    } finally {
+      setRefresh(true);
+    }
+  }
+
+  const handleRejectOffer = async (offerId: string) => {
+    try {
+      const requestUrl = new URL(`${API_URL}/v1/offers/decline/${offerId}`);
+
+      const res = await fetch(requestUrl, {
+        method: "PATCH"
+      });
+
+      if (res.ok) {
+        toast.success("You have declined this offer!");
+      } else {
+        toast.error("Something has gone wrong!");
+      }
+    } catch (err) {
+      toast.error("Something has gone wrong!");
+      console.log(err);
+    } finally {
+      setRefresh(true);
+    }
+  }
+
   return (
     <div>
       <div className='flex items-center justify-between'>
@@ -83,7 +133,7 @@ export default function Offers() {
               </div>
 
               <div className='flex flex-col gap-2 my-5'>
-                <Dialog>
+                <Dialog open={acceptDialog} onOpenChange={setAcceptDialog}>
                   <DialogTrigger asChild>
                     <Button variant="secondary">
                       Accept
@@ -102,12 +152,13 @@ export default function Offers() {
                           No
                         </Button>
                       </DialogTrigger>
-                      <Button type="submit">Yes</Button>
+
+                      <Button type="submit" onClick={() => handleAcceptOffer(offer.id)}>Yes</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
 
-                <Dialog>
+                {/* <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline">
                       Counter Offer
@@ -134,9 +185,9 @@ export default function Offers() {
                       <Button type="submit">Send offer</Button>
                     </DialogFooter>
                   </DialogContent>
-                </Dialog>
+                </Dialog> */}
 
-                <Dialog>
+                <Dialog open={declineDialog} onOpenChange={setDeclineDialog}>
                   <DialogTrigger asChild>
                     <Button variant="destructive">
                       Reject
@@ -155,7 +206,8 @@ export default function Offers() {
                           No
                         </Button>
                       </DialogTrigger>
-                      <Button type="submit">Yes</Button>
+
+                      <Button type="submit" onClick={() => handleRejectOffer(offer.id)}>Yes</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -168,3 +220,5 @@ export default function Offers() {
     </div>
   )
 }
+
+export default withPageRequiredAuth(Offers, { roles: [RoleEnum.ADMIN] })

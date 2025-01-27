@@ -37,6 +37,8 @@ import { useMyDomain } from '@/services/domains/my-domains-provider'
 import useFetch from '@/services/api/use-fetch'
 import { API_URL } from '@/services/api/config'
 import { useParams } from 'next/navigation'
+import HTTP_CODES_ENUM from '@/services/api/types/http-codes'
+import { toast } from 'react-toastify'
 
 export default function DnsRecords() {
     const fetch = useFetch();
@@ -74,8 +76,14 @@ export default function DnsRecords() {
                 body: JSON.stringify({...newRecord, ttl: parseInt((newRecord as any).ttl)})
             });
             
-            if (res.ok) {
-                console.log("Record added!", data);
+            const data = await res.json();
+            
+            if (res.status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
+                console.log(data);
+                toast.warn(data.errors[Object.keys(data.errors)[0]]);
+                return;
+            } else {
+                toast.success("Record has been added!");
             }
         } catch(err) {
             console.log(err);
@@ -107,11 +115,17 @@ export default function DnsRecords() {
                 
                 body: JSON.stringify(formData)
             });
-    
-            if (res.ok) {
+            
+            const data = await res.json();
+            
+            if (res.status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
+                console.log(data);
+                toast.warn(data.errors[Object.keys(data.errors)[0]]);
+                return;
+            } else {
                 setEditing(-1);
                 console.log("Record saved!", data);
-                window.alert("Record has been updated");
+                toast.success("Records have been updated!");
             }
         } catch(err) {
             console.log(err);

@@ -2,7 +2,7 @@
 
 import useAuth from '@/services/auth/use-auth';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { redirect, usePathname } from 'next/navigation';
 import React from 'react'
 
 export default function Layout({
@@ -11,8 +11,10 @@ export default function Layout({
     children: React.ReactNode;
 }>) {
     const pathname = usePathname();
-    const { user } = useAuth();
+    const { user, isLoaded } = useAuth();
 
+    if (isLoaded && !user) return redirect("/auth/login");
+    
     const NavLink = ({ title, path }: { title: string; path: string }) => {
         const isActivePath = pathname === path;
     

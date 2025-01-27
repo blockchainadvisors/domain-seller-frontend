@@ -9,6 +9,7 @@ import useAuthTokens from '@/services/auth/use-auth-tokens';
 import withPageRequiredGuest from '@/services/auth/with-page-required-guest';
 import Link from 'next/link';
 import React, { useState } from 'react'
+import { toast } from 'react-toastify';
 
 function Register() {
   const { setUser } = useAuthActions();
@@ -40,7 +41,7 @@ function Register() {
       });
 
     if (statusSignUp === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
-      window.alert("Please check all fields!");
+      toast.warn(dataSignUp.errors[Object.keys(dataSignUp.errors)[0]]);
       return;
     }
 

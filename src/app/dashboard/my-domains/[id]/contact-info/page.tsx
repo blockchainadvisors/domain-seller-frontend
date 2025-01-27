@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { useMyDomain } from "@/services/domains/my-domains-provider";
 import useFetch from "@/services/api/use-fetch";
 import { API_URL } from "@/services/api/config";
+import HTTP_CODES_ENUM from "@/services/api/types/http-codes";
+import { toast } from "react-toastify";
 
 // A reusable component for contact sections
 const ContactSection = ({
@@ -209,15 +211,26 @@ export default function ContactInfo() {
     };
 
     try {
-      await fetch(requestUrl, {
+      const res = await fetch(requestUrl, {
         method: "PATCH",
         body: JSON.stringify(info)
       });
 
-      window.alert("Contacts were updated!");
-    } catch(err) {
+      const data = await res.json();
+
+      if (res.status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
+        const firstErrorKey = Object.keys(data.errors)[0];
+        const firstError = data.errors[firstErrorKey];
+        const firstErrorMsg = firstError[Object.keys(firstError)[0]];
+
+        toast.warn(`${firstErrorKey}: ${firstErrorMsg}`);
+        return;
+      } else {
+        toast.success("Contacts were updated!");
+      }
+    } catch (err) {
       console.log(err);
-    }   
+    }
   }
 
   return (

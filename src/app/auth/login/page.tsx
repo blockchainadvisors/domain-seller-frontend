@@ -9,6 +9,7 @@ import useAuthTokens from '@/services/auth/use-auth-tokens';
 import withPageRequiredGuest from '@/services/auth/with-page-required-guest';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
+import { toast } from 'react-toastify';
 
 function Login() {
   const { setUser } = useAuthActions();
@@ -25,7 +26,8 @@ function Login() {
     });
 
     if (status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
-      window.alert("Please check all fields!")
+      console.log(data);
+      toast.warn(data.errors[Object.keys(data.errors)[0]]);
       return;
     }
 

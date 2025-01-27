@@ -1,8 +1,9 @@
 "use client"
 
+import { RoleEnum } from '@/services/api/types/role';
 import useAuth from '@/services/auth/use-auth';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { redirect, usePathname } from 'next/navigation';
 import React from 'react'
 
 export default function Layout({
@@ -10,11 +11,10 @@ export default function Layout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const { user } = useAuth();
+    const { user, isLoaded } = useAuth();
     const pathname = usePathname();
 
-    if (!user) return <p>...</p>
-
+    if (isLoaded && user && user?.role?.id !== RoleEnum.ADMIN) return redirect("/dashboard");
 
     return (
         <div>

@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import "react-tabs/style/react-tabs.css";
 
 type Payment = {
@@ -108,21 +108,19 @@ function PaymentPage() {
     <div className="flex flex-col gap-5 mt-5">
       <h1 className="text-2xl font-bold">Payments</h1>
 
-      <Tabs>
-        <TabList>
-          <Tab>All Payments</Tab>
-          <Tab>Processing Payments</Tab>
-        </TabList>
+      <Tabs defaultValue="all-payments" className="w-full">
+        <TabsList>
+          <TabsTrigger value="all-payments">All Payments</TabsTrigger>
+          <TabsTrigger value="processing-payments">Processing Payments</TabsTrigger>
+        </TabsList>
 
-        {/* All Payments Tab */}
-        <TabPanel>
+        <TabsContent value="all-payments">
           {allPaymentsTable(payments)}
-        </TabPanel>
+        </TabsContent>
 
-        {/* Processing Payments Tab */}
-        <TabPanel>
+        <TabsContent value="processing-payments">
           {allPaymentsTable(payments.filter((payment) => payment.status === "PROCESSING"))}
-        </TabPanel>
+        </TabsContent>
       </Tabs>
     </div>
   );

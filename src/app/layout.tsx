@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import AuthProvider from "@/services/auth/auth-provider";
 import DomainProvider from "@/services/domains/domains-provider";
 import { MyDomainsProvider } from "@/services/domains/my-domains-provider";
+import { ToastContainer } from 'react-toastify';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body
         className={`flex flex-col min-h-screen ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <ToastContainer/>
         <AuthProvider>
           <MyDomainsProvider>
             <DomainProvider>

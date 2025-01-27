@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import useFetch from '@/services/api/use-fetch';
 import { API_URL } from '@/services/api/config';
+import { toast } from 'react-toastify';
+import HTTP_CODES_ENUM from '@/services/api/types/http-codes';
 
 function Settings() {
     const fetch = useFetch();
@@ -19,7 +21,7 @@ function Settings() {
         try {
             const requestUrl = new URL(`${API_URL}/v1/users/${user?.id}`);
 
-            await fetch(requestUrl, {
+            const res = await fetch(requestUrl, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json"
@@ -28,9 +30,18 @@ function Settings() {
                     first_name: firstname,
                     last_name: lastname
                 })
-            })
+            });
 
-            window.alert("Your profile has been updated!");
+            const data = await res.json();
+            
+            if (res.status === HTTP_CODES_ENUM.UNPROCESSABLE_ENTITY) {
+                console.log(data);
+                toast.warn(data.errors[Object.keys(data.errors)[0]]);
+                return;
+            } else {
+                toast.success("Your profile has been updated!");
+            }
+
         } catch(err) {
             console.error(err);
         }

@@ -34,8 +34,11 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from "@/components/ui/drawer"
+import { toast } from 'react-toastify';
+import withPageRequiredAuth from '@/services/auth/with-page-required-auth';
+import { RoleEnum } from '@/services/api/types/role';
 
-export default function Auctions() {
+function Auctions() {
     const fetch = useFetch();
 
     const [availableDomains, setAvailableDomains] = useState<any[]>([]);
@@ -122,7 +125,7 @@ export default function Auctions() {
 
                 // Get all domains that are listed (ready to auction)
                 console.log(auctions);
-                setAvailableAuctions(auctions);
+                setAvailableAuctions(auctions.filter(auction => (auction.status === "ACTIVE")));
             }
 
             await getAvailableAuctions();
@@ -160,10 +163,12 @@ export default function Auctions() {
 
     const handleCreateAuction = async () => {
         try {
+            if (!chosenDomainId.length) return toast.warn("Please select a domain");
+
             const requestUrl = new URL(`${API_URL}/v1/auctions`);
             const { start_time, end_time } = generateStartAndEndTime();
 
-            await fetch(requestUrl, {
+            const res = await fetch(requestUrl, {
                 method: "POST",
                 body: JSON.stringify({
                     domain_id: chosenDomainId,
@@ -177,14 +182,18 @@ export default function Auctions() {
                 })
             });
 
-            // Reset form
-            resetForm();
-
-            // Close drawer
-            setDrawerOpen(false);
-
-            // Alert
-            window.alert("Your auction is now live!");
+            if (res.ok) {
+                // Reset form
+                resetForm();
+    
+                // Close drawer
+                setDrawerOpen(false);
+    
+                // Alert
+                toast.success("Your auction has been created!");
+            } else {
+                toast.error("Something went wrong!");
+            }
         } catch (err) {
             console.log(err);
         }
@@ -466,3 +475,5 @@ export default function Auctions() {
         </div>
     )
 }
+
+export default withPageRequiredAuth(Auctions, { roles: [RoleEnum.ADMIN] })
