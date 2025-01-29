@@ -338,11 +338,15 @@ function Auctions() {
                                         <SelectItem value="7">7 days</SelectItem>
                                         <SelectItem value="9">9 days</SelectItem>
                                         <SelectItem value="11">11 days</SelectItem>
-                                        <SelectItem value="11">13 days</SelectItem>
-                                        <SelectItem value="11">15 days</SelectItem>
-                                        <SelectItem value="11">17 days</SelectItem>
-                                        <SelectItem value="11">19 days</SelectItem>
-                                        <SelectItem value="11">21 days</SelectItem>
+                                        <SelectItem value="13">13 days</SelectItem>
+                                        <SelectItem value="15">15 days</SelectItem>
+                                        <SelectItem value="17">17 days</SelectItem>
+                                        <SelectItem value="19">19 days</SelectItem>
+                                        <SelectItem value="21">21 days</SelectItem>
+                                        <SelectItem value="23">23 days</SelectItem>
+                                        <SelectItem value="25">25 days</SelectItem>
+                                        <SelectItem value="27">27 days</SelectItem>
+                                        <SelectItem value="29">29 days</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
