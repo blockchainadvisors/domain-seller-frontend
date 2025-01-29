@@ -43,12 +43,12 @@ function Auctions() {
 
     const [availableDomains, setAvailableDomains] = useState<any[]>([]);
     const [availableAuctions, setAvailableAuctions] = useState<any[]>([]);
-    
+
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
     const [auctionDeleteDialogOpen, setAuctionDeleteDialogOpen] = useState<boolean>(false);
     const [editAuctionDialogOpen, setEditAuctionDialogOpen] = useState<boolean>(false);
-    
+
     const [chosenDomainId, setChosenDomainId] = useState<string>('');
     const [minIncrement, setMinIncrement] = useState<number>(0.01);
     const [reservePrice, setReservePrice] = useState<number>(0.01);
@@ -63,23 +63,23 @@ function Auctions() {
                 let currentPage = 1; // Start with the first page
                 let hasNextPage = true; // Initialize with true to enter the loop
                 const domains = []; // Array to store the results
-    
+
                 while (hasNextPage) {
                     const requestUrl = new URL(`${API_URL}/v1/domains?page=${currentPage}`);
-    
+
                     try {
                         const res = await fetch(requestUrl);
                         if (!res.ok) {
                             throw new Error(`Error fetching page ${currentPage}: ${res.statusText}`);
                         }
-    
+
                         const body = await res.json();
-    
+
                         // Add the current page's data to the domains array
                         if (body.data) {
                             domains.push(...body.data); // Assuming data.items contains the domains
                         }
-    
+
                         // Update hasNextPage and increment the page number
                         hasNextPage = body.hasNextPage;
                         currentPage++;
@@ -88,7 +88,7 @@ function Auctions() {
                         break; // Exit the loop on error
                     }
                 }
-    
+
                 // Get all domains that are listed (ready to auction)
                 setAvailableDomains(domains.filter(domain => (domain.status === "LISTED")));
             }
@@ -97,23 +97,23 @@ function Auctions() {
                 let currentPage = 1; // Start with the first page
                 let hasNextPage = true; // Initialize with true to enter the loop
                 const auctions = []; // Array to store the results
-    
+
                 while (hasNextPage) {
                     const requestUrl = new URL(`${API_URL}/v1/auctions?page=${currentPage}`);
-    
+
                     try {
                         const res = await fetch(requestUrl);
                         if (!res.ok) {
                             throw new Error(`Error fetching page ${currentPage}: ${res.statusText}`);
                         }
-    
+
                         const body = await res.json();
-    
+
                         // Add the current page's data to the domains array
                         if (body.data) {
                             auctions.push(...body.data); // Assuming data.items contains the domains
                         }
-    
+
                         // Update hasNextPage and increment the page number
                         hasNextPage = body.hasNextPage;
                         currentPage++;
@@ -185,10 +185,10 @@ function Auctions() {
             if (res.ok) {
                 // Reset form
                 resetForm();
-    
+
                 // Close drawer
                 setDrawerOpen(false);
-    
+
                 // Alert
                 toast.success("Your auction has been created!");
             } else {
@@ -245,6 +245,11 @@ function Auctions() {
         }
     }
 
+    const handleNumberInput = async (value: string, cb: any) => {
+        const parsedValue = value === "" ? 0 : parseFloat(value);
+        cb(isNaN(parsedValue) ? 0 : parsedValue);
+    }
+
     return (
         <div>
             <div className='flex flex-col md:flex-row md:items-center gap-2 justify-between'>
@@ -282,7 +287,14 @@ function Auctions() {
                                     <small className='text-muted'>The minimum increment for each bid</small>
                                 </div>
 
-                                <Input placeholder="5" type="number" value={minIncrement} onChange={(e) => setMinIncrement(parseInt(e.target.value))} />
+                                <Input
+                                    placeholder="5"
+                                    type="number"
+                                    value={minIncrement}
+                                    onChange={(e) => {
+                                        handleNumberInput(e.target.value, setMinIncrement);
+                                    }}
+                                />
                             </div>
 
                             <div className='flex flex-col gap-2 mb-2'>
@@ -291,7 +303,7 @@ function Auctions() {
                                     <small className='text-muted'>The price the bid must reached to make a sale</small>
                                 </div>
 
-                                <Input placeholder="0" type="number" value={reservePrice} onChange={(e) => setReservePrice(parseInt(e.target.value))} />
+                                <Input placeholder="0" type="number" value={reservePrice} onChange={(e) => handleNumberInput(e.target.value, setReservePrice)} />
                             </div>
 
                             <div className='flex flex-col gap-2 mb-2'>
@@ -300,7 +312,7 @@ function Auctions() {
                                     <small className='text-muted'>The buy it now price</small>
                                 </div>
 
-                                <Input placeholder="0" type="number" value={leasePrice} onChange={(e) => setLeasePrice(parseInt(e.target.value))} />
+                                <Input placeholder="0" type="number" value={leasePrice} onChange={(e) => handleNumberInput(e.target.value, setLeasePrice)} />
                             </div>
 
                             <div className='flex flex-col gap-2 mb-2'>
@@ -309,7 +321,7 @@ function Auctions() {
                                     <small className='text-muted'>Initial bid amount</small>
                                 </div>
 
-                                <Input placeholder="0" type="number" value={minimumPrice} onChange={(e) => setMinimumPrice(parseInt(e.target.value))} />
+                                <Input placeholder="0" type="number" value={minimumPrice} onChange={(e) => handleNumberInput(e.target.value, setMinimumPrice)} />
                             </div>
 
                             <div className='flex flex-col gap-2 mb-2'>
@@ -318,7 +330,7 @@ function Auctions() {
                                     <small className='text-muted'>The number of months the user has access to this domain</small>
                                 </div>
 
-                                <Input placeholder="0" type="number" value={expiryDuration} onChange={(e) => setExpiryDuration(parseInt(e.target.value))} />
+                                <Input placeholder="0" type="number" value={expiryDuration} onChange={(e) => handleNumberInput(e.target.value, setExpiryDuration)} />
                             </div>
 
                             <div className='flex flex-col gap-2 mb-2'>
@@ -399,7 +411,7 @@ function Auctions() {
                                                 <div className='flex flex-col gap-2 mb-2'>
                                                     <div className='flex flex-col'>
                                                         <label className='font-semibold text'>Lease Price ($)</label>
-                                                        { auction.current_bid.length && <span className='text-xs text-orange-400 font-bold'>Existing bids, updating disabled</span>}
+                                                        {auction.current_bid.length && <span className='text-xs text-orange-400 font-bold'>Existing bids, updating disabled</span>}
                                                     </div>
 
                                                     <Input placeholder="0" type="number" onChange={(e) => setLeasePrice(parseInt(e.target.value))} value={leasePrice} disabled={auction.current_bid.length} />
@@ -451,7 +463,7 @@ function Auctions() {
                                     <label className="font-bold">Minimum Increment:</label>
                                     <span>{auction.min_increment}</span>
                                 </div>
-                                
+
                                 <div className="flex flex-col w-full">
                                     <label className="font-bold">Reserve Price ($):</label>
                                     <span>{auction.reserve_price}</span>
